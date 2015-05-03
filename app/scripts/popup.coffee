@@ -2,6 +2,24 @@
 
 # this script is used in popup.html
 
+Stat =
+  data: {}
+  cur: null
+
+chrome.storage.sync.get 'disqus.data', (item) ->
+  if item['disqus.data']
+    Stat.data = JSON.parse(item['disqus.data'])
+
+saveInfo = (url) ->
+  if Stat.cur
+  	lst = Stat.data[Stat.cur]
+  Stat.cur = url
+  lst = Stat.data[url] or []
+  lst.push($('#inputName').val())
+  lst.push($('#inputEmail').val())
+  Stat.data[url] = lst
+  chrome.storage.sync.set {'disqus.data': JSON.stringify(Stat.data)}
+
 validateEmail = (email) ->
   re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i
   re.test email
@@ -27,22 +45,23 @@ $('#inputComment').on 'keyup', (e) ->
 			active: true
 			currentWindow: true
 			}, (tab) ->
-				console.log 'popup 12'
+				saveInfo getHostName(tab[0].url).host
 				Backend.newComment(getHostName(tab[0].url).host, $('#inputName').val(), $('#inputEmail').val(), $('#inputComment').val())
 				return    
   	return
 
 getHostName = (href) ->
-    l = document.createElement('a')
-    l.href = href
-    l
+	l = document.createElement('a')
+	l.href = href
+	l
 
 chrome.tabs.query {
-	active: true
-	currentWindow: true
-	}, (tab) ->
-		Backend.getComments(getHostName(tab[0].url).host)
-		return
-
-
-
+  active: true
+  currentWindow: true
+}, (tab) ->
+	Backend.getComments(getHostName(tab[0].url).host)
+	lst = Stat.data[getHostName(tab[0].url).host]
+	if(lst)
+		$('#inputEmail').val(lst[lst.length-1])
+		$('#inputName').val(lst[lst.length-2])
+	return

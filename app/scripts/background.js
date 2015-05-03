@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var getHostName, loadToStorage, updateBadge;
+  var getHostName, updateBadge;
 
   chrome.runtime.onInstalled.addListener(function(details) {
     return console.log('previousVersion', details.previousVersion);
@@ -17,10 +17,6 @@
     return chrome.browserAction.setBadgeText({
       text: "" + getCount
     });
-  };
-
-  loadToStorage = function(url, res) {
-    return localStorage["" + url] = res;
   };
 
   chrome.tabs.onActivated.addListener(function(activeInfo) {

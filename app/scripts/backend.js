@@ -24,11 +24,10 @@
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             i = _ref[_i];
             if (i.url === url) {
-              console.log(i.url + ' ' + url);
-              total_count += 1;
+              total_count++;
               gravatar = '<img src = https://s.gravatar.com/avatar/' + hex_md5(i.email) + '?s=64 />';
               tableComment = '<table> <tr><td>' + gravatar + '</td> <td><h4  style="margin-top:0px;">' + i.name + '</h4><h5>' + i.comment + '</h5></td> <td style="vertical-align:top; padding-left:120px;"><h6>' + (i.pub_date.substring(0, 10)) + '</h6></td></tr></table></br>';
-              console.log(tableComment);
+              $('#count').html(total_count + ' Comment');
               $('#comments').append(tableComment);
             }
           }
@@ -37,7 +36,32 @@
       return hr.send(null);
     },
     getCount: function(url, callback, errback) {
-      return total_count;
+      var count, xhr;
+      count = 0;
+      xhr = new XMLHttpRequest;
+      xhr.open('GET', urlBackend, true);
+      xhr.setRequestHeader('Content-type', 'application/json', true);
+      xhr.send(null);
+      return xhr.onload = function(e) {
+        var data, i, _i, _len, _ref;
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            data = JSON.parse(xhr.responseText);
+            _ref = data.objects;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              i = _ref[_i];
+              if (url === i.url) {
+                count++;
+              }
+            }
+            chrome.browserAction.setBadgeText({
+              text: '' + count
+            });
+          } else {
+            console.error(xhr.statusText);
+          }
+        }
+      };
     },
     newComment: function(url, name, email, comment, callback, errback) {
       var json, xhr;

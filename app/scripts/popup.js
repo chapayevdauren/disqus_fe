@@ -1,6 +1,32 @@
 (function() {
   'use strict';
-  var getHostName, validateEmail;
+  var Stat, getHostName, saveInfo, validateEmail;
+
+  Stat = {
+    data: {},
+    cur: null
+  };
+
+  chrome.storage.sync.get('disqus.data', function(item) {
+    if (item['disqus.data']) {
+      return Stat.data = JSON.parse(item['disqus.data']);
+    }
+  });
+
+  saveInfo = function(url) {
+    var lst;
+    if (Stat.cur) {
+      lst = Stat.data[Stat.cur];
+    }
+    Stat.cur = url;
+    lst = Stat.data[url] || [];
+    lst.push($('#inputName').val());
+    lst.push($('#inputEmail').val());
+    Stat.data[url] = lst;
+    return chrome.storage.sync.set({
+      'disqus.data': JSON.stringify(Stat.data)
+    });
+  };
 
   validateEmail = function(email) {
     var re;
@@ -34,7 +60,7 @@
         active: true,
         currentWindow: true
       }, function(tab) {
-        console.log('popup 12');
+        saveInfo(getHostName(tab[0].url).host);
         Backend.newComment(getHostName(tab[0].url).host, $('#inputName').val(), $('#inputEmail').val(), $('#inputComment').val());
       });
     }
@@ -51,7 +77,13 @@
     active: true,
     currentWindow: true
   }, function(tab) {
+    var lst;
     Backend.getComments(getHostName(tab[0].url).host);
+    lst = Stat.data[getHostName(tab[0].url).host];
+    if (lst) {
+      $('#inputEmail').val(lst[lst.length - 1]);
+      $('#inputName').val(lst[lst.length - 2]);
+    }
   });
 
 }).call(this);

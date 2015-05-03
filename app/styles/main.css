@@ -1,6 +1,6 @@
 body,
 html {
-    height: 500px;
+    height: 600px;
     width: 400px;
     overflow: hidden;
 }
@@ -10,18 +10,30 @@ body {
 }
 
 .panel-body {
-    max-height: 300px;
+    max-height: 110px;
 }
 
 .panel-primary {
-    max-height: 600px;
+    max-height: 300px;
+    overflow: auto;
 }
 
-#icon, #type {
-	float: left;
+#form {
+    margin-top: -15px;
 }
 
-#type{
-	margin-left: 10px;
-	width: 90%;
+#comments {
+	padding-top: 10px;
+    padding-left: 10px;
+    min-height: 70px;
+}
+
+#icon,
+#type {
+    float: left;
+}
+
+#type {
+    margin-left: 10px;
+    width: 90%;
 }
