@@ -80,7 +80,6 @@
         }
         alert(this.responseText);
       };
-      console.log(json);
       return xhr.send(json);
     }
   };

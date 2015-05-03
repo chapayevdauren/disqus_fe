@@ -2,14 +2,17 @@
 
 # this script is used in popup.html
 
+# use Stat for saving email and name
 Stat =
   data: {}
   cur: null
 
+# get our email and name from storage
 chrome.storage.sync.get 'disqus.data', (item) ->
   if item['disqus.data']
     Stat.data = JSON.parse(item['disqus.data'])
 
+# save email and name to chrome.storage in json type
 saveInfo = (url) ->
   if Stat.cur
   	lst = Stat.data[Stat.cur]
@@ -20,6 +23,7 @@ saveInfo = (url) ->
   Stat.data[url] = lst
   chrome.storage.sync.set {'disqus.data': JSON.stringify(Stat.data)}
 
+# check email and name fields on bugs, like not filled, not write email and etc...
 validateEmail = (email) ->
   re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i
   re.test email
@@ -39,22 +43,30 @@ $('#inputName').on 'focusout', (e) ->
 	else
 		$( "#inputComment" ).attr( "disabled", "" )
 
+# check enter pressed or not
 $('#inputComment').on 'keyup', (e) ->
+	# keyCode of enter equal to 13
 	if e.keyCode == 13
+		# get tab url from chrome method
 		chrome.tabs.query {
 			active: true
 			currentWindow: true
 			}, (tab) ->
+				# save
 				saveInfo getHostName(tab[0].url).host
+				# create new comment
 				Backend.newComment(getHostName(tab[0].url).host, $('#inputName').val(), $('#inputEmail').val(), $('#inputComment').val())
+				$('#inputComment').html('')
 				return    
   	return
 
+# get host name
 getHostName = (href) ->
 	l = document.createElement('a')
 	l.href = href
 	l
 
+# get from data by host our email and name, and put this value to need fields
 chrome.tabs.query {
   active: true
   currentWindow: true
